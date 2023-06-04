@@ -1,0 +1,320 @@
+import 'package:dio/dio.dart';
+import 'package:places_service/places_service.dart';
+import 'package:stacked/stacked_annotations.dart';
+import 'package:stacked_services/stacked_services.dart';
+
+import '../../infrastructure/apis/employees_api.dart';
+import '../../infrastructure/apis/ritel_generate_token_api.dart';
+import '../../infrastructure/apis/ritel_informasi_agunan_pokok_api.dart';
+import '../../infrastructure/apis/ritel_informasi_agunan_tambahan_api.dart';
+import '../../infrastructure/apis/ritel_informasi_pinjaman_api.dart';
+import '../../infrastructure/apis/ritel_laporan_kunjungan_nasabah_api.dart';
+import '../../infrastructure/apis/ritel_legalitas_usaha_api.dart';
+import '../../infrastructure/apis/ritel_master_api.dart';
+import '../../infrastructure/apis/ritel_monitoring_api.dart';
+import '../../infrastructure/apis/ritel_mutasi_rekening_api.dart';
+import '../../infrastructure/apis/ritel_partnership_api.dart';
+import '../../infrastructure/apis/ritel_pencairan_api.dart';
+import '../../infrastructure/apis/ritel_penurunan_api.dart';
+import '../../infrastructure/apis/ritel_pipeline_perorangan_api.dart';
+import '../../infrastructure/apis/ritel_pipeline_perusahaan_cv_api.dart';
+import '../../infrastructure/apis/ritel_pipeline_perusahaan_pt_api.dart';
+import '../../infrastructure/apis/ritel_prakarsa_api.dart';
+import '../../infrastructure/apis/ritel_riwayat_projek_api.dart';
+import '../../infrastructure/apis/ritel_screening_api.dart';
+import '../../infrastructure/apis/ritel_trade_checking_api.dart';
+import '../../infrastructure/apis/ritel_upload_crr_api.dart';
+import '../../infrastructure/apis/ritel_upload_file_api.dart';
+import '../../infrastructure/apis/user_api.dart';
+import '../../ui/shared/guided_camera_view.dart';
+import '../../ui/shared/no_network.dart';
+import '../../ui/shared/server_maintenance.dart';
+import '../../ui/views/address_selection/address_selection_view.dart';
+import '../../ui/views/akun/akun_view.dart';
+import '../../ui/views/akun/bantuan/bantuan_view.dart';
+import '../../ui/views/akun/informasi_pribadi/informasi_pribadi_view.dart';
+import '../../ui/views/akun/kebijakan_privasi/kebijakan_privasi_view.dart';
+import '../../ui/views/akun/syarat_ketentuan/syarat_ketentuan_view.dart';
+import '../../ui/views/beranda/beranda_view.dart';
+import '../../ui/views/beranda/monitoring/monitoring_detail/monitoring_detail_view.dart';
+import '../../ui/views/beranda/monitoring/monitoring_view.dart';
+import '../../ui/views/beranda/monitoring/penurunan_pinjaman/penurunan_pinjaman_success_view.dart';
+import '../../ui/views/beranda/monitoring/penurunan_pinjaman/penurunan_pinjaman_view.dart';
+import '../../ui/views/beranda/monitoring/pinjaman_detail/pinjaman_detail_view.dart';
+import '../../ui/views/beranda/monitoring/tambah_pencairan/tambah_pencairan_view.dart';
+import '../../ui/views/beranda/ndp/hasil_prescreening/hasil_prescreening_view_cv_ritel.dart';
+import '../../ui/views/beranda/ndp/hasil_prescreening/hasil_prescreening_view_ritel.dart';
+import '../../ui/views/beranda/partnership/partnership_view_ritel.dart';
+import '../../ui/views/beranda/partnership/tambah_partnership/tambah_partnership_view_ritel.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/prakarsa_details_view_ritel.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/hasil_analisa_pinjaman/hasil_analisa_pinjaman_success_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/hasil_analisa_pinjaman/hasil_analisa_pinjaman_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_lkn/informasi_agunan_lkn_form.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_lkn/informasi_agunan_lkn_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_lkn/widgets/informasi_agunan_lkn_details.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_tambahan/informasi_agunan_tambahan_details_cash_coll.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_tambahan/informasi_agunan_tambahan_details_mesin.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_tambahan/informasi_agunan_tambahan_details_motor.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_tambahan/informasi_agunan_tambahan_details_tanah.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_tambahan/informasi_agunan_tambahan_details_tanah_bangunan.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_tambahan/informasi_agunan_tambahan_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan/informasi_agunan_view_ritel.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_lkn_pari/widgets/informasi_agunan_lkn_details_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_tambahan_pari/informasi_agunan_tambahan_details_cash_coll_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_tambahan_pari/informasi_agunan_tambahan_details_mesin_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_tambahan_pari/informasi_agunan_tambahan_details_motor_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_tambahan_pari/informasi_agunan_tambahan_details_tanah_bangunan_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_tambahan_pari/informasi_agunan_tambahan_details_tanah_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_tambahan_pari/informasi_agunan_tambahan_view_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_agunan_pari/informasi_agunan_view_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_debitur/informasi_debitur_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_debitur_pari/informasi_debitur_pari_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/data_laporan_finansial/screen/informasi_finansial_form_period1.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/data_laporan_finansial/screen/informasi_finansial_view_period1.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/informasi_finansial_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/mutasi_rekening/mutasi_rekening_form_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/mutasi_rekening/mutasi_rekening_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/mutasi_rekening/widgets/mutasi_rekening_details.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/riwayat_projek/riwayat_projek_details.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial/riwayat_projek/riwayat_projek_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/data_laporan_finansial/screen/informasi_finansial_form_period_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/informasi_finansial_view_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/mutasi_rekening/mutasi_rekening_pari_form_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/mutasi_rekening/mutasi_rekening_pari_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/mutasi_rekening/widgets/mutasi_rekening_details.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/mutasi_rekening/widgets/mutasi_rekening_details_item.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/mutasi_transaksi/mutasi_transaksi_detail.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_finansial_pari/mutasi_transaksi/mutasi_transaksi_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_non_finansial/summary_informasi_non_finansial.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_non_finansial/widgets/informasi_non_finansial_page_1_A.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_non_finansial_pari/summary_informasi_non_finansial_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_non_finansial_pari/widgets/informasi_non_finansial_page_1_A_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_pengurus/informasi_pengurus_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_perusahaan/informasi_perusahaan_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_pinjaman/informasi_pinjaman_view_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_pinjaman/informasi_pinjaman_view_ritel.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_pinjaman/pinang_maxima_pari/widgets/informasi_pinjaman_details_pari.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/informasi_pinjaman/pinang_maxima_ritel/widgets/informasi_pinjaman_details_ritel.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha/legalitas_usaha_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha/tambah_dokumen_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha/update_dokumen_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_pari/legalitas_usaha_pari_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_pari/tambah_dokumen_pari_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_pari/update_dokumen_pari_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_perusahaan/cv/legalitas_usaha_perusahaan_cv_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_perusahaan/cv/tambah_dokumen_perusahaan_cv_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_perusahaan/cv/update_dokumen_perusahaan_cv_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_perusahaan/pt/legalitas_usaha_perusahaan_pt_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_perusahaan/pt/tambah_dokumen_perusahaan_pt_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/legalitas_usaha_perusahaan/pt/update_dokumen_perusahaan_pt_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/trade_checking/trade_checking_details.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/trade_checking/trade_checking_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/upload_crr/upload_crr_view.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_details_ritel/tabs/informasi_prakarsa/upload_crr/widgets/upload_crr_details.dart';
+import '../../ui/views/beranda/prakarsa/prakarsa_view.dart';
+import '../../ui/views/beranda/widgets/stats_cards/widgets/status_kelolaan_item_details_view.dart';
+import '../../ui/views/login/login_view.dart';
+import '../../ui/views/main/main_view.dart';
+import '../../ui/views/pipeline/pipeline_details/pipeline_details_cv_view_ritel.dart';
+import '../../ui/views/pipeline/pipeline_details/pipeline_details_pt_view_ritel.dart';
+import '../../ui/views/pipeline/pipeline_details/pipeline_details_view_ritel.dart';
+import '../../ui/views/pipeline/pipeline_details_pari/pipeline_details_view_pari.dart';
+import '../../ui/views/pipeline/pipeline_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_pari/perorangan_pari/informasi_data_diri_pari/informasi_data_diri_view_pari.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_pari/perorangan_pari/informasi_lainnya_pari/informasi_lainnya_pari_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_pari/perorangan_pari/informasi_usaha_debitur_pari/informasi_usaha_debitur_pari_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_pari/perorangan_pari/tdp_perorangan_view_pari.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perorangan/informasi_data_diri/informasi_data_diri_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perorangan/informasi_lainnya/informasi_lainnya_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perorangan/informasi_usaha_debitur/informasi_usaha_debitur_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perorangan/tdp_perorangan_view_ritel.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_cv/informasi_lainnya_cv/informasi_lainnya_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_cv/informasi_pengurus_cv/informasi_pengurus_cv_board_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_cv/informasi_pengurus_cv/informasi_pengurus_cv_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_cv/informasi_perusahaan_cv/informasi_perusahaan_cv_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_cv/tdp_perusahaan_cv_view_ritel.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_pt/informasi_lainnya_pt/informasi_lainnya_pt_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_pt/informasi_pengurus_pt/informasi_pengurus_pt_board_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_pt/informasi_pengurus_pt/informasi_pengurus_pt_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_pt/informasi_perusahaan_pt/informasi_perusahaan_pt_view.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/perusahaan_pt/tdp_perusahaan_pt_view_ritel.dart';
+import '../../ui/views/pipeline/tambah_debitur_potensial_ritel/tdp_view_ritel.dart';
+import '../../ui/views/pipeline/widgets/pipeline_success_view_pari.dart';
+import '../../ui/views/pipeline/widgets/pipeline_success_view_ritel.dart';
+import '../../ui/views/startup/startup_view.dart';
+import '../services/connectivity_service.dart';
+import '../services/dio_service.dart';
+import '../services/local_db_service.dart';
+import '../services/location_service.dart';
+import '../services/media_service.dart';
+import '../services/url_launcher_service.dart';
+
+@StackedApp(
+  routes: [
+    MaterialRoute(page: StartupView, initial: true),
+    MaterialRoute(page: LoginView),
+    MaterialRoute(page: MainView),
+    MaterialRoute(page: BerandaView),
+    MaterialRoute(page: PipelineView),
+    MaterialRoute(page: PrakarsaView),
+    MaterialRoute(page: AddressSelectionView),
+    MaterialRoute(page: AkunView),
+    MaterialRoute(page: ServerMaintenance),
+    MaterialRoute(page: NoNetwork),
+    MaterialRoute(page: GuidedCameraView),
+    MaterialRoute(page: InformasiPribadiView),
+    MaterialRoute(page: BantuanView),
+    MaterialRoute(page: SyaratKetentuanView),
+    MaterialRoute(page: KebijakanPrivasiView),
+    MaterialRoute(page: StatusKelolaanItemDetailsView),
+    MaterialRoute(page: PartnershipViewRitel),
+    MaterialRoute(page: TambahPartnershipViewRitel),
+
+    /** Perorangan */
+    MaterialRoute(page: TDPViewRitel),
+    MaterialRoute(page: TDPPeroranganViewRitel),
+    MaterialRoute(page: InformasiDataDiriView),
+    MaterialRoute(page: InformasiUsahaDebiturView),
+    MaterialRoute(page: InformasiLainnyaView),
+    MaterialRoute(page: PipelineDetailsViewRitel),
+    /** PT */
+    MaterialRoute(page: TDPPerusahaanPtViewRitel),
+    MaterialRoute(page: InformasiPerusahaanPtView),
+    MaterialRoute(page: InformasiPengurusPtView),
+    MaterialRoute(page: InformasiLainnyaPtView),
+    MaterialRoute(page: PipelineDetailsPtViewRitel),
+    MaterialRoute(page: InformasiPengurusPemilikBoardView),
+    MaterialRoute(page: HasilPrescreeningViewPerusahaanCVRitel),
+    /** CV */
+    MaterialRoute(page: TDPPerusahaanCvViewRitel),
+    MaterialRoute(page: InformasiPerusahaanCvView),
+    MaterialRoute(page: InformasiPengurusCvView),
+    MaterialRoute(page: InformasiLainnyaCvView),
+    MaterialRoute(page: PipelineDetailsCvViewRitel),
+    MaterialRoute(page: PipelineSuccessViewRitel),
+    MaterialRoute(page: InformasiPengurusPemilikBoardCvView),
+    /** Prakarsa */
+    MaterialRoute(page: PrakarsaDetailsViewRitel),
+    MaterialRoute(page: InformasiDebiturView),
+    MaterialRoute(page: InformasiPerusahaanView),
+    MaterialRoute(page: InformasiPengurusView),
+    MaterialRoute(page: LegalitasUsahaView),
+    MaterialRoute(page: LegalitasUsahaPerusahaanPtView),
+    MaterialRoute(page: LegalitasUsahaPerusahaanCvView),
+    MaterialRoute(page: TambahDokumenView),
+    MaterialRoute(page: UpdateDokumenView),
+    MaterialRoute(page: TambahDokumenPerusahaanPtView),
+    MaterialRoute(page: UpdateDokumenPerusahaanPtView),
+    MaterialRoute(page: TambahDokumenPerusahaanCvView),
+    MaterialRoute(page: UpdateDokumenPerusahaanCvView),
+    MaterialRoute(page: HasilPrescreeningViewRitel),
+    MaterialRoute(page: InformasiFinansialView),
+    MaterialRoute(page: InformasiFinansialViewPeriodOne),
+    MaterialRoute(page: InformasiFinansialFormPeriodOne),
+    MaterialRoute(page: MutasiRekeningView),
+    MaterialRoute(page: MutasiRekeningFormView),
+    MaterialRoute(page: MutasiRekeningDetails),
+    MaterialRoute(page: InformasiNonFinasialPageOneA),
+    MaterialRoute(page: SummaryInformasiNonFinansial),
+    MaterialRoute(page: InformasiAgunanViewRitel),
+    MaterialRoute(page: InformasiAgunanTambahanView),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsTanah),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsTanahBangunan),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsMotor),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsCashCollateral),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsMesin),
+    MaterialRoute(page: InformasiAgunanLKNView),
+    MaterialRoute(page: InformasiAgunanLknDetails),
+    MaterialRoute(page: InformasiAgunanLknForm),
+    MaterialRoute(page: InformasiPinjamanViewRitel),
+    MaterialRoute(page: InformasiPinjamanDetailsRitel),
+    MaterialRoute(page: RiwayatProjekView),
+    MaterialRoute(page: TradeCheckingView),
+    MaterialRoute(page: TradeCheckingDetails),
+    MaterialRoute(page: RiwayatProjekDetails),
+    MaterialRoute(page: UploadCRRView),
+    MaterialRoute(page: UploadCRRDetails),
+    MaterialRoute(page: HasilAnalisaPinjamanViewRitel),
+    MaterialRoute(page: HasilAnalisaPinjamanSuccessView),
+    /** PARI */
+    MaterialRoute(page: TDPPeroranganViewPari),
+    MaterialRoute(page: InformasiDataDiriViewPari),
+    MaterialRoute(page: InformasiUsahaDebiturPariView),
+    MaterialRoute(page: InformasiLainnyaPariView),
+    MaterialRoute(page: PipelineDetailsViewPari),
+    MaterialRoute(page: PipelineSuccessViewPari),
+    MaterialRoute(page: InformasiAgunanViewPari),
+    MaterialRoute(page: InformasiAgunanTambahanViewPari),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsTanahPari),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsTanahBangunanPari),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsMotorPari),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsCashCollateralPari),
+    MaterialRoute(page: InformasiAgunanTambahanDetailsMesinPari),
+    MaterialRoute(page: InformasiAgunanLknDetailsPari),
+    MaterialRoute(page: InformasiNonFinasialPageOneAPari),
+    MaterialRoute(page: SummaryInformasiNonFinansialPari),
+    MaterialRoute(page: InformasiPinjamanViewPari),
+    MaterialRoute(page: InformasiPinjamanDetailsPari),
+    MaterialRoute(page: InformasiDebiturPari),
+    MaterialRoute(page: InformasiFinansialViewPari),
+    MaterialRoute(page: LegalitasUsahaPariView),
+    MaterialRoute(page: TambahDokumenPariView),
+    MaterialRoute(page: UpdateDokumenPariView),
+    MaterialRoute(page: InformasiFinansialFormPeriodPari),
+    MaterialRoute(page: MutasiTransaksiPariView),
+    MaterialRoute(page: MutasiTransaksiDetail),
+    MaterialRoute(page: MutasiRekeningPariView),
+    MaterialRoute(page: MutasiRekeningPariFormView),
+    MaterialRoute(page: MutasiRekeningDetailsPari),
+    MaterialRoute(page: MutasiRekeningDetailsItemPari),
+    /** Monitoring */
+    MaterialRoute(page: MonitoringRitelView),
+    MaterialRoute(page: MonitoringDetailView),
+    MaterialRoute(page: TambahPencairanView),
+    MaterialRoute(page: PinjamanDetailView),
+    MaterialRoute(page: PenurunanPinjamanView),
+    MaterialRoute(page: PenurunanPinjamanSuccessView),
+  ],
+  dependencies: [
+    LazySingleton(classType: NavigationService),
+    LazySingleton(classType: DialogService),
+    LazySingleton(classType: BottomSheetService),
+    LazySingleton(classType: PlacesService),
+    LazySingleton(classType: MaksimaLocationService),
+    LazySingleton(classType: MaksimaMediaService),
+    LazySingleton(classType: URLLauncherService),
+    LazySingleton(classType: ConnectivityService),
+    Singleton(classType: MaksimaLocalDBService),
+    Singleton(
+      classType: DioService,
+      resolveUsing: DioService.getInstance,
+      asType: Dio,
+    ),
+    LazySingleton(classType: UserAPI),
+    LazySingleton(classType: EmployeesAPI),
+    LazySingleton(classType: RitelGenerateTokenAPI),
+    LazySingleton(classType: RitelMasterAPI),
+    LazySingleton(classType: RitelUploadFileAPI),
+    LazySingleton(classType: RitelPipelinePeroranganAPI),
+    LazySingleton(classType: RitelPipelinePerusahaanCvAPI),
+    LazySingleton(classType: RitelPipelinePerusahaanPtAPI),
+    LazySingleton(classType: RitelScreeningAPI),
+    LazySingleton(classType: RitelPrakarsaAPI),
+    LazySingleton(classType: RitelLegalitasUsahaAPI),
+    LazySingleton(classType: RitelInformasiAgunanTambahanAPI),
+    LazySingleton(classType: RitelInformasiAgunanPokokAPI),
+    LazySingleton(classType: RitelLaporanKunjunganNasabahAPI),
+    LazySingleton(classType: RitelInformasiPinjamanAPI),
+    LazySingleton(classType: RitelRiwayatProyekAPI),
+    LazySingleton(classType: RitelTradeCheckingAPI),
+    LazySingleton(classType: RitelMutasiRekeningAPI),
+    LazySingleton(classType: RitelUploadCRRAPI),
+    LazySingleton(classType: RitelMonitoringAPI),
+    LazySingleton(classType: RitelPartnershipAPI),
+    LazySingleton(classType: RitelPencairanAPI),
+    LazySingleton(classType: RitelPenurunanAPI),
+  ],
+)
+class AppSetup {
+  /** Serves no purpose besides having an annotation attached to it **/
+}
